@@ -1,5 +1,8 @@
-const fastify = require('fastify')({ logger: true });
-const Database = require('better-sqlite3');
+import fastify from 'fastify';
+
+import Database from 'better-sqlite3';
+
+const app = fastify();
 
 // SQLite database
 const db = new Database('ensnames.db', { verbose: console.log });
@@ -13,16 +16,16 @@ const createTable = db.prepare(`
 `);
 createTable.run();
 
-fastify.get('/', async (request, reply) => {
+app.get('/', async (request, reply) => {
   return 'health ok';
 });
 
-fastify.get('/offchain-names', async (request, reply) => {
+app.get('/offchain-names', async (request, reply) => {
   const ensnames = db.prepare('SELECT * FROM ensnames').all();
   return ensnames;
 });
 
-fastify.get('/offchain-name/:id', async (request, reply) => {
+app.get('/offchain-name/:id', async (request, reply) => {
   const { id } = request.params;
   const item = db.prepare('SELECT * FROM subnames WHERE id = ?').get(id);
   if (!item) {
@@ -31,7 +34,7 @@ fastify.get('/offchain-name/:id', async (request, reply) => {
   return item;
 });
 
-fastify.put('/offchain-name', async (request, reply) => {
+app.put('/offchain-name', async (request, reply) => {
   const { name } = request.body;
 
   if (typeof (name) !== "string") return reply.code(400).send({ error: 'Expected name to be a string' });
@@ -45,10 +48,10 @@ fastify.put('/offchain-name', async (request, reply) => {
 
 const start = async () => {
   try {
-    await fastify.listen({ port: 3000 });
-    fastify.log.info(`Server is listening on ${fastify.server.address().port}`);
+    await app.listen({ port: 3000 });
+    app.log.info(`Server is listening on ${app.server.address().port}`);
   } catch (err) {
-    fastify.log.error(err);
+    app.log.error(err);
     process.exit(1);
   }
 };
