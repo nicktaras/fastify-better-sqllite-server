@@ -12,5 +12,5 @@ A simple fastify better sqllite server.
 
 ## default to port 3000
 
-`[localhost:3000](http://localhost:3000/)`
+`http://localhost:3000/`
 
